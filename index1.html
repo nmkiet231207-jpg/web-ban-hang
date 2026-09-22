@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tìm Kiếm Sản Phẩm</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      #o-tim-kiem {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .san-pham {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+      .gia-tien {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Kho Hàng Mini</h2>
+
+    <!-- Ô nhập từ khóa tìm kiếm đã xóa phần placeholder -->
+    <input type="text" id="o-tim-kiem" />
+
+    <!-- Nơi hiển thị kết quả -->
+    <div id="hien-thi"></div>
+
+    <script>
+      // 1. DỮ LIỆU SẢN PHẨM
+      const products = [
+        { id: 1, name: "Laptop Dell Latitude 5411", price: 12000000 },
+        { id: 2, name: "Loa XDOBO X8 Max", price: 1500000 },
+        { id: 3, name: "Sữa rửa mặt CeraVe", price: 350000 },
+        { id: 4, name: "Kem chống nắng Sunplay Skin Aqua", price: 200000 },
+      ];
+
+      // 2. HÀM HIỂN THỊ
+      function render(danhSach) {
+        const vungHienThi = document.getElementById("hien-thi");
+
+        if (danhSach.length === 0) {
+          vungHienThi.innerHTML = "<p>Không tìm thấy sản phẩm nào.</p>";
+          return;
+        }
+
+        const htmlArray = danhSach.map(function (item) {
+          return `
+          <div class="san-pham">
+            <h3>${item.name}</h3>
+            <p class="gia-tien">${item.price.toLocaleString("vi-VN")} VNĐ</p>
+          </div>
+        `;
+        });
+
+        vungHienThi.innerHTML = htmlArray.join("");
+      }
+
+      render(products);
+
+      // 3. XỬ LÝ SỰ KIỆN TÌM KIẾM
+      const oTimKiem = document.getElementById("o-tim-kiem");
+
+      oTimKiem.addEventListener("input", function (event) {
+        const tuKhoa = event.target.value.toLowerCase();
+
+        const ketQuaTimKiem = products.filter(function (item) {
+          const tenSanPham = item.name.toLowerCase();
+          return tenSanPham.includes(tuKhoa);
+        });
+
+        render(ketQuaTimKiem);
+      });
+    </script>
+  </body>
+</html>
