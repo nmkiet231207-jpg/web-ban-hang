@@ -2,7 +2,7 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>Tìm Kiếm Sản Phẩm</title>
+    <title>Kho Hàng Mini - Pro Version</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -10,81 +10,164 @@
         max-width: 600px;
         margin: 0 auto;
       }
+      /* Căn chỉnh các công cụ điều khiển */
+      .bang-dieu-khien {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
       #o-tim-kiem {
         width: 100%;
         padding: 10px;
         font-size: 16px;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        box-sizing: border-box;
       }
+      button {
+        padding: 8px 12px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        cursor: pointer;
+        border: 1px solid #999;
+        background-color: white;
+        border-radius: 4px;
+      }
+      button:hover {
+        background-color: #ddd;
+      }
+      #btn-xoa-loc {
+        background-color: #ff4d4d;
+        color: white;
+        border: none;
+      }
+      /* Giao diện sản phẩm */
       .san-pham {
         border: 1px solid #ddd;
         padding: 15px;
         margin-bottom: 10px;
         border-radius: 5px;
         background-color: #f9f9f9;
+        display: flex;
+        justify-content: space-between; /* Đẩy giá và tên ra 2 bên */
+        align-items: center;
       }
       .gia-tien {
         color: red;
         font-weight: bold;
+        font-size: 18px;
+        margin: 0;
+      }
+      h3 {
+        margin: 0;
       }
     </style>
   </head>
   <body>
-    <h2>Kho Hàng Mini</h2>
+    <h2>Kho Hàng Mini (Bộ Lọc Đa Năng)</h2>
 
-    <!-- Ô nhập từ khóa tìm kiếm đã xóa phần placeholder -->
-    <input type="text" id="o-tim-kiem" />
+    <!-- BẢNG ĐIỀU KHIỂN -->
+    <div class="bang-dieu-khien">
+      <input type="text" id="o-tim-kiem" placeholder="Nhập tên sản phẩm..." />
 
-    <!-- Nơi hiển thị kết quả -->
+      <div>
+        <strong>Lọc theo giá:</strong>
+        <!-- Gắn mức giá vào dataset -->
+        <button class="btn-loc-gia" data-gia="50000">Dưới 50k</button>
+        <button class="btn-loc-gia" data-gia="2000000">Dưới 2 Triệu</button>
+      </div>
+
+      <div style="margin-top: 10px">
+        <strong>Sắp xếp:</strong>
+        <button id="btn-sap-xep-tang">Giá: Thấp -> Cao</button>
+        <button id="btn-sap-xep-giam">Giá: Cao -> Thấp</button>
+      </div>
+
+      <div style="margin-top: 10px">
+        <button id="btn-xoa-loc">Xóa Tất Cả Bộ Lọc</button>
+      </div>
+    </div>
+
+    <!-- KHU VỰC HIỂN THỊ KẾT QUẢ -->
     <div id="hien-thi"></div>
 
     <script>
-      // 1. DỮ LIỆU SẢN PHẨM
+      //1.Dữ liệu gốc
       const products = [
-        { id: 1, name: "Laptop Dell Latitude 5411", price: 12000000 },
-        { id: 2, name: "Loa XDOBO X8 Max", price: 1500000 },
-        { id: 3, name: "Sữa rửa mặt CeraVe", price: 350000 },
-        { id: 4, name: "Kem chống nắng Sunplay Skin Aqua", price: 200000 },
+        { id: 1, name: "Vinfast VF3", price: 300000000 },
+        { id: 2, name: "Mi tom indomie", price: 5500 },
+        { id: 3, name: "Giay da bong wika", price: 200000 },
       ];
-
-      // 2. HÀM HIỂN THỊ
+      //2.Hien thi
+      const hienThi = document.getElementById("hien-thi");
       function render(danhSach) {
-        const vungHienThi = document.getElementById("hien-thi");
-
         if (danhSach.length === 0) {
-          vungHienThi.innerHTML = "<p>Không tìm thấy sản phẩm nào.</p>";
+          hienThi.innerHTML = "<p>Khong tim thay san pham nao phu hop</p>";
           return;
         }
-
-        const htmlArray = danhSach.map(function (item) {
-          return `
-          <div class="san-pham">
-            <h3>${item.name}</h3>
-            <p class="gia-tien">${item.price.toLocaleString("vi-VN")} VNĐ</p>
-          </div>
-        `;
-        });
-
-        vungHienThi.innerHTML = htmlArray.join("");
+        const htmlArray = danhSach.map(
+          (item) =>
+            `<div class ="san-pham">
+              <h3>${item.name}</h3>
+              <p class ="gia-tien">${item.price.toLocaleString("vi-VN")} VND</p>
+              </div>
+            `,
+        );
+        hienThi.innerHTML = htmlArray.join("");
       }
+      //3.Bo loc tong hop
+      let tuKhoaHienTai = "";
+      let giaToiDaHienTai = Infinity;
+      let kieuSapXepHienTai = "mac-dinh";
 
-      render(products);
-
-      // 3. XỬ LÝ SỰ KIỆN TÌM KIẾM
-      const oTimKiem = document.getElementById("o-tim-kiem");
-
-      oTimKiem.addEventListener("input", function (event) {
-        const tuKhoa = event.target.value.toLowerCase();
-
-        const ketQuaTimKiem = products.filter(function (item) {
-          const tenSanPham = item.name.toLowerCase();
-          return tenSanPham.includes(tuKhoa);
+      function boLocTongHop() {
+        const ketQuaLoc = products.filter(function (item) {
+          const thoaManTuKhoa = item.name.toLowerCase().includes(tuKhoaHienTai);
+          const thoaManGia = item.price < giaToiDaHienTai;
+          return thoaManGia && thoaManTuKhoa;
         });
-
-        render(ketQuaTimKiem);
+        if (kieuSapXepHienTai === "tang") {
+          ketQuaLoc.sort((a, b) => a.price - b.price);
+        } else if (kieuSapXepHienTai === "giam") {
+          ketQuaLoc.sort((a, b) => b.price - a.price);
+        }
+        render(ketQuaLoc);
+      }
+      //4. Them su kien
+      const oTimKiem = document.getElementById("o-tim-kiem");
+      oTimKiem.addEventListener("input", function (event) {
+        tuKhoaHienTai = event.target.value.toLowerCase();
+        boLocTongHop();
       });
+      document.querySelectorAll(".btn-loc-gia").forEach(function (nut) {
+        nut.addEventListener("click", function (event) {
+          giaToiDaHienTai = Number(event.target.dataset.gia);
+          boLocTongHop();
+        });
+      });
+      document
+        .getElementById("btn-sap-xep-tang")
+        .addEventListener("click", function (event) {
+          kieuSapXepHienTai = "tang";
+          boLocTongHop();
+        });
+      document
+        .getElementById("btn-sap-xep-giam")
+        .addEventListener("click", function (event) {
+          kieuSapXepHienTai = "giam";
+          boLocTongHop();
+        });
+      document
+        .getElementById("btn-xoa-loc")
+        .addEventListener("click", function (event) {
+          giaToiDaHienTai = Infinity;
+          tuKhoaHienTai = "";
+          kieuSapXepHienTai = "mac-dinh";
+          boLocTongHp();
+        });
+      render(products);
     </script>
   </body>
 </html>
